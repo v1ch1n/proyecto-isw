@@ -7,13 +7,13 @@ router.get("/", async (req, res) => {
         const response = await axios.get("https://c840cfx2we.execute-api.us-east-1.amazonaws.com/dev/isw/org-user-list-report");
         const data = response.data;
         const emails = new Set();
-        var count = 0;
+        var number_accounts = 0;
         data.Items.forEach(element => {
             var email = element.account;
             emails.add(email);
-            count += 1;
+            number_accounts += 1;
         });
-        return res.send({emails: Array.from(emails), count});
+        return res.send({emails: Array.from(emails), number_accounts});
     } catch(error){
         res.status(400).send(error);
     }
