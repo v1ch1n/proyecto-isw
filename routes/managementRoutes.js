@@ -3,16 +3,12 @@ const axios = require('axios');
 const router = express.Router();
 
 // Modelos
-const { Proyecto } = require("../models");
-const { Sesion } = require("../models");
-const { Reserva } = require("../models");
+const { Proyecto, Sesion, Reserva } = require("../models");
 
 // Proyectos
 router.get("/projects", async (req, res) => {
     try{
-        const projects = await Proyecto.findAll({
-            attributes: ["id", "id_maker", "nombre", "descripcion"],
-        });
+        const projects = await Proyecto.findAll();
         res.send(projects);
     }
     catch(error){
@@ -40,11 +36,11 @@ router.delete("/projects/:id", async (req, res) => {
         })
         .then(function (deletedRecord) {
             if(deletedRecord === 1){
-                res.status(200).json({message:"Deleted successfully"});          
+                res.status(200).json({message:"Proyecto eliminado satisfactoriamente"});          
             }
             else
             {
-                res.status(404).json({message:"record not found"})
+                res.status(404).json({message:"Proyecto no existe"})
             }
         })
     }
@@ -81,6 +77,78 @@ router.put("/sessions/:id", async (req, res) =>{
         sesion.cumplida = true;
         await sesion.save();
         res.status(200).json({message:"Sesión finalizada"});
+    }
+    catch(error){
+        res.status(400).send(error);
+    }
+})
+
+// Reservas
+router.get("/reservations", async (req, res) =>{
+    try{
+        const reservations = await Reserva.findAll();
+        res.send(reservations);
+    }
+    catch(error){
+        res.status(400).send(error);
+    }
+})
+
+router.post("/reservations", async (req, res) =>{
+    try{
+        const id_sesion = req.body.id_sesion;
+        const sesion = await Sesion.findByPk(id_sesion);
+        if (sesion.cumplida === false){
+            const createReservation = await Reserva.create(req.body);
+            res.send(createReservation);
+        }
+        else{
+            res.status(401).send({message: "Necesitas tener una sesión activa para reservar una máquina"});
+        }
+    }
+    catch(error){
+        res.status(400).send(error);
+    }
+})
+
+router.put("/reservations/:id", async (req, res) =>{
+    try{
+        const id = req.params.id;
+        const timestamp = req.body.timestamp;
+        const timestampTime = new Date(timestamp).getTime();
+        const currentTime = new Date().getTime();
+        if (timestampTime > currentTime){
+            const reservation = await Reserva.findByPk(id);
+            reservation.timestamp = timestamp;
+            await reservation.save();
+            res.send({message: "Hora de la reserva actualizada"});
+        }
+        else{
+            res.status(400).send({message: "Hora no válida para reserva"});
+        }
+    }
+    catch(error){
+        res.status(400).send(error);
+    }
+})
+
+router.delete("/reservations/:id", async (req, res) =>{
+    try{
+        const id = req.params.id;
+        Reserva.destroy({
+            where:{
+                id: id
+            }
+        })
+        .then(function(deletedRecord){
+            if(deletedRecord === 1){
+                res.status(200).json({message:"Reserva eliminada satisfactoriamente"});          
+            }
+            else
+            {
+                res.status(404).json({message:"Reserva no existe"})
+            }
+        })
     }
     catch(error){
         res.status(400).send(error);
