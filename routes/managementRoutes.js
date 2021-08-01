@@ -74,7 +74,7 @@ router.put("/sessions/:id", async (req, res) =>{
     try{
         const id = req.params.id;
         const sesion = await Sesion.findByPk(id);
-        if (sesion.cumplida === null){
+        if (sesion.cumplida === false){
             sesion.cumplida = true;
             await sesion.save();
             res.status(200).json({message:"Sesión finalizada"});
@@ -103,7 +103,7 @@ router.post("/reservations", async (req, res) =>{
     try{
         const id_sesion = req.body.id_sesion;
         const sesion = await Sesion.findByPk(id_sesion);
-        if (sesion.cumplida === null){
+        if (sesion.cumplida === false){
             const createReservation = await Reserva.create(req.body);
             res.send(createReservation);
         }
