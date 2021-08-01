@@ -74,9 +74,14 @@ router.put("/sessions/:id", async (req, res) =>{
     try{
         const id = req.params.id;
         const sesion = await Sesion.findByPk(id);
-        sesion.cumplida = true;
-        await sesion.save();
-        res.status(200).json({message:"Sesión finalizada"});
+        if (sesion.cumplida === false){
+            sesion.cumplida = true;
+            await sesion.save();
+            res.status(200).json({message:"Sesión finalizada"});
+        }
+        else{
+            res.status(400).send({message:"Sesión expirada"})
+        }
     }
     catch(error){
         res.status(400).send(error);
