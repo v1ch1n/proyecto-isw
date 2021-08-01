@@ -88,6 +88,29 @@ router.put("/sessions/:id", async (req, res) =>{
     }
 })
 
+router.delete("/sessions/:id", async (req, res) =>{
+    try{
+        const id = req.params.id;
+        Sesion.destroy({
+            where:{
+                id: id
+            }
+        })
+        .then(function(deletedRecord){
+            if(deletedRecord === 1){
+                res.status(200).json({message:"Sesión eliminada satisfactoriamente"});          
+            }
+            else
+            {
+                res.status(404).json({message:"Sesión no existe"})
+            }
+        })
+    }
+    catch(error){
+        res.status(400).send(error);
+    }
+})
+
 // Reservas
 router.get("/reservations", async (req, res) =>{
     try{
