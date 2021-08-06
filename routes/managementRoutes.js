@@ -126,13 +126,28 @@ router.post("/reservations", async (req, res) =>{
     try{
         const id_sesion = req.body.id_sesion;
         const sesion = await Sesion.findByPk(id_sesion);
+        const id_maquina = req.body.id_maquina;
+        const response = await axios.get("http://ec2-3-131-75-133.us-east-2.compute.amazonaws.com/resources/listarMaquinas");
+        const data = response.data;
+        var machine_exists = false;
+        for (let i in data){
+            if (data[i][id_maquina]){
+                machine_exists = true;
+                break;
+            }
+        }
         if (sesion.cumplida === false){
-            const createReservation = await Reserva.create(req.body);
-            res.send(createReservation);
+            if (machine_exists){
+                const createReservation = await Reserva.create(req.body);
+                res.send(createReservation);
+            }
+            else{
+                res.status(401).send({message: "No existe una máquina con tal ID"});
+            }
         }
         else{
             res.status(401).send({message: "Necesitas tener una sesión activa para reservar una máquina"});
-        }
+        }     
     }
     catch(error){
         res.status(400).send(error);
