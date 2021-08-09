@@ -18,8 +18,23 @@ router.get("/projects", async (req, res) => {
 
 router.post("/projects", async (req, res) => {
     try{
-        const createProject = await Proyecto.create(req.body);
-        res.send(createProject);
+        const id_maker = req.body.id_maker;
+        const response = await axios.get("https://727378f74246.up.railway.app/student/all");
+        const data = response.data;
+        var maker_exists = false;
+        for (let i in data){
+            if (data[i]['id'] === id_maker){
+                maker_exists = true;
+                break;
+            }
+        }
+        if (maker_exists){
+            const createProject = await Proyecto.create(req.body);
+            res.send(createProject);
+        }
+        else{
+            res.status(404).send({"message": "No existe un maker con tal ID"});
+        }
     }
     catch(error){
         res.status(400).send(error);
@@ -142,7 +157,7 @@ router.post("/reservations", async (req, res) =>{
                 res.send(createReservation);
             }
             else{
-                res.status(401).send({message: "No existe una máquina con tal ID"});
+                res.status(404).send({message: "No existe una máquina con tal ID"});
             }
         }
         else{
