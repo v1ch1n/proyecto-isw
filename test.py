@@ -7,25 +7,33 @@ session_url = "http://ec2-18-221-198-9.us-east-2.compute.amazonaws.com/managemen
 reserve_url = "http://ec2-18-221-198-9.us-east-2.compute.amazonaws.com/management/reservations"
 
 # Creación de proyectos mediante el método POST
-project1 = requests.post(url=project_url, json={"id_maker": 1, "nombre": "Proyecto ISW", "descripcion": "Creación de API definida"}).json()
-project2 = requests.post(url=project_url, json={"id_maker": 3, "nombre": "Proyecto Testeo", "descripcion": "Probando cosas"}).json()
+# Realizada la integración con el contexto de personas, el maker tiene que existir para una creación de proyectos exitosa
+project1 = requests.post(url=project_url, json={"id": 1, "id_maker": 1, "nombre": "Proyecto ISW", "descripcion": "Creación de API definida"}).json()
+project2 = requests.post(url=project_url, json={"id": 2, "id_maker": 3, "nombre": "Proyecto Testeo", "descripcion": "Probando cosas"}).json()
+# Ejemplo en que se crea un proyecto no válido
+invalid_project = requests.post(url=project_url, json={"id": 3, "id_maker": 98, "nombre": "Proyecto ISW", "descripcion": "Creación de API definida"}).json()
+print(invalid_project)
 
 # Obtención de los proyectos que existen en la base de datos mediante el método GET
 projects = requests.get(url=project_url).json()
-print("Proyectos registrados: ", projects)
+print("\nProyectos registrados: ", projects)
 
 # Creación de sesiones mediante el método POST (las sesiones por defecto vienen con el parámetro 'cumplida' = false)
-session1 = requests.post(url=session_url, json={"id_proyecto": project1['id']}).json()
-session2 = requests.post(url=session_url, json={"id_proyecto": project2['id']}).json()
+session1 = requests.post(url=session_url, json={"id": 1, "id_proyecto": project1['id']}).json()
+session2 = requests.post(url=session_url, json={"id": 2, "id_proyecto": project2['id']}).json()
 
 # Obtención de las sesiones que existen en la base de datos mediante el método GET
 sessions = requests.get(url=session_url).json()
 print("\nSesiones existentes: ", sessions) 
 
 # Creación de reservas mediante el método POST
+# Realizada la integración con el contexto de recursos, se requiere que la máquina exista para una reserva exitosa
 # Formato de timestamps -> timestamp with time zone de PostgreSQL (año-mes-día hora:minutos:segundos)
-reservation1 = requests.post(url=reserve_url, json={"id_sesion": session1['id'], "timestamp": "2021-08-20 12:00:00", "id_maquina": 1}).json()
-reservation2 = requests.post(url=reserve_url, json={"id_sesion": session2['id'], "timestamp": "2021-09-01 17:00:00", "id_maquina": 3}).json()
+reservation1 = requests.post(url=reserve_url, json={"id": 1, "id_sesion": session1['id'], "timestamp": "2021-08-20 12:00:00", "id_maquina": 1}).json()
+reservation2 = requests.post(url=reserve_url, json={"id": 2, "id_sesion": session2['id'], "timestamp": "2021-09-01 17:00:00", "id_maquina": 3}).json()
+# Ejemplo en que se crea una reserva no válida
+invalid_reservation = requests.post(url=reserve_url, json={"id": 3, "id_sesion": session2['id'], "timestamp": "2021-09-03 17:00:00", "id_maquina": 75}).json()
+print("\n", invalid_reservation)
 
 # Obtención de las reservas que existen en la base de datos mediante el método GET
 reservations = requests.get(url=reserve_url).json()
