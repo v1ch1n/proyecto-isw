@@ -19,7 +19,7 @@ router.get("/projects", async (req, res) => {
 router.post("/projects", async (req, res) => {
     try{
         const id_maker = req.body.id_maker;
-        const response = await axios.get("https://727378f74246.up.railway.app/student/all");
+        const response = await axios.get("https://2c32fcf08ad9.up.railway.app/student/all");
         const data = response.data;
         var maker_exists = false;
         for (let i in data){
